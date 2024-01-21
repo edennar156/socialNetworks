@@ -73,6 +73,8 @@ class Graph:
         :return: Double: The average clustering coefficient of the graph
 
         """
+        if self.average_clustering_coefficient == None:
+            self.calculate_clustering_coefficients()
         return self.average_clustering_coefficient
 
     def get_clustering_coefficient(self, node_id):
@@ -81,6 +83,8 @@ class Graph:
         :param node_id:
         :return: The clustering coefficient of the given node id
         """
+        if not self.clustering_coefficients:
+            self.calculate_clustering_coefficients()
         if node_id not in self.clustering_coefficients.keys():
             return -1
         else:
@@ -92,14 +96,28 @@ class Graph:
         :return: List of pairs: <node id, clustering coefficient>
 
         """
+        if not self.clustering_coefficients:
+            self.calculate_clustering_coefficients()
         lst = [(node, self.clustering_coefficients[node]) for node in self.clustering_coefficients]
-        return lst.sort(key=lambda a: a[1], reverse=True)
+        return sorted(lst,key=lambda a: a[1], reverse=True)
 
     def calculate_freeman_centralization(self):
         """
         Calculates the Freeman centralization of the graph. Save the calculated result value internally.
         :return:
         """
+        # calculating the max degree of the graph
+        maxDegree = 0
+        for i in self.graph.values():
+            if len(i) > maxDegree:
+                maxDegree = len(i)
+
+        # calculating sum of variations
+        sum = 0
+        for node in self.graph:
+            sum += maxDegree - len(self.graph[node])
+
+        self.freeman_centralization = sum / (len(self.graph) - 1)*(len(self.graph) - 2)
 
     def get_freeman_centralization(self):
         """
@@ -107,9 +125,18 @@ class Graph:
         :return: calculated Freeman centralization of the graph
         """
 
+        if self.freeman_centralization == None:
+            self.calculate_freeman_centralization()
 
+        return self.freeman_centralization
 
 
 
 my_graph = Graph()  # Create an instance of the Graph class
-my_graph.load_graph("C:\\Users\\edenn\\Downloads\\Karate.csv")
+my_graph.load_graph("C:\\Users\\RazM\\Downloads\\Karate.csv")
+my_graph.calculate_freeman_centralization()
+print(len(my_graph.graph))
+print(len(my_graph.edges))
+print(my_graph.get_average_clustering_coefficient())
+print(my_graph.get_all_clustering_coefficients()[:10])
+print(my_graph.get_freeman_centralization())
