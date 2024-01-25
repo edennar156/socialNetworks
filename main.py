@@ -27,7 +27,9 @@ class Graph:
                 # don't read the first row
                 if count == 1:
                     continue
-                source, destination = line.strip("\n").split(",")
+                nodes = line.strip("\n").split(",") if "," in line else line.strip("\n").split()
+                source, destination = nodes[0], nodes[1] if len(nodes) > 1 else ''
+
                 # If source is a single node
                 if destination == '':
                     self.graph[source] = set()
@@ -61,11 +63,9 @@ class Graph:
                 k_i = len(self.graph[node])
                 e_i = sum(1 for pair in combinations(self.graph[node], 2) if
                           pair in self.edges or tuple(reversed(pair)) in self.edges)
-                self.clustering_coefficients[node] = 2 * e_i / (k_i * (k_i - 1))
+                self.clustering_coefficients[node] = (2 * e_i) / (k_i * (k_i - 1))
 
-        N = sum(1 for node in self.clustering_coefficients if self.clustering_coefficients[node] != 0.0)
-        self.average_clustering_coefficient = sum(
-            self.clustering_coefficients[node] for node in self.clustering_coefficients) / N
+        self.average_clustering_coefficient = sum(self.clustering_coefficients.values()) / len(self.graph)
 
     def get_average_clustering_coefficient(self):
         """
@@ -73,7 +73,7 @@ class Graph:
         :return: Double: The average clustering coefficient of the graph
 
         """
-        if self.average_clustering_coefficient == None:
+        if self.average_clustering_coefficient is None:
             self.calculate_clustering_coefficients()
         return self.average_clustering_coefficient
 
@@ -99,7 +99,7 @@ class Graph:
         if not self.clustering_coefficients:
             self.calculate_clustering_coefficients()
         lst = [(node, self.clustering_coefficients[node]) for node in self.clustering_coefficients]
-        return sorted(lst,key=lambda a: a[1], reverse=True)
+        return sorted(lst, key=lambda a: a[1], reverse=True)
 
     def calculate_freeman_centralization(self):
         """
@@ -117,7 +117,7 @@ class Graph:
         for node in self.graph:
             sum += maxDegree - len(self.graph[node])
 
-        self.freeman_centralization = sum / (len(self.graph) - 1)*(len(self.graph) - 2)
+        self.freeman_centralization = sum / ((len(self.graph) - 1) * (len(self.graph) - 2))
 
     def get_freeman_centralization(self):
         """
@@ -125,18 +125,10 @@ class Graph:
         :return: calculated Freeman centralization of the graph
         """
 
-        if self.freeman_centralization == None:
+        if self.freeman_centralization is None:
             self.calculate_freeman_centralization()
 
         return self.freeman_centralization
 
 
 
-my_graph = Graph()  # Create an instance of the Graph class
-my_graph.load_graph("C:\\Users\\RazM\\Downloads\\Karate.csv")
-my_graph.calculate_freeman_centralization()
-print(len(my_graph.graph))
-print(len(my_graph.edges))
-print(my_graph.get_average_clustering_coefficient())
-print(my_graph.get_all_clustering_coefficients()[:10])
-print(my_graph.get_freeman_centralization())
